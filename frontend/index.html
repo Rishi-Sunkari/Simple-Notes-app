@@ -27,7 +27,6 @@
       min-height: 100vh;
     }
 
-    /* ── HEADER ── */
     header {
       background: var(--ink);
       padding: 28px 48px;
@@ -58,14 +57,12 @@
       text-transform: uppercase;
     }
 
-    /* ── MAIN LAYOUT ── */
     main {
       max-width: 900px;
       margin: 0 auto;
       padding: 40px 24px 80px;
     }
 
-    /* ── SEARCH BAR ── */
     .search-wrap {
       position: relative;
       margin-bottom: 40px;
@@ -100,7 +97,6 @@
 
     #searchInput::placeholder { color: var(--muted); font-weight: 300; }
 
-    /* ── ADD NOTE FORM ── */
     .add-section {
       background: var(--surface);
       border-radius: 16px;
@@ -163,7 +159,6 @@
     .btn-add:hover { background: #A83E1F; }
     .btn-add:active { transform: scale(0.97); }
 
-    /* ── NOTES SECTION ── */
     .notes-header {
       display: flex;
       align-items: center;
@@ -185,7 +180,6 @@
       border-radius: 20px;
     }
 
-    /* ── NOTES GRID ── */
     #notesList {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -242,7 +236,6 @@
       padding: 0 2px;
     }
 
-    /* ── EMPTY STATE ── */
     .empty {
       text-align: center;
       padding: 60px 20px;
@@ -251,7 +244,6 @@
     .empty svg { margin-bottom: 16px; opacity: 0.4; }
     .empty p { font-size: 0.95rem; font-weight: 300; }
 
-    /* ── TOAST ── */
     #toast {
       position: fixed;
       bottom: 32px;
@@ -279,7 +271,6 @@
 
 <main>
 
-  <!-- Search -->
   <div class="search-wrap">
     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
       <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -287,7 +278,6 @@
     <input type="text" id="searchInput" placeholder="Search notes…" autocomplete="off"/>
   </div>
 
-  <!-- Add Note -->
   <div class="add-section">
     <h2>New note</h2>
     <div class="form-row">
@@ -297,7 +287,6 @@
     </div>
   </div>
 
-  <!-- Notes List -->
   <div class="notes-header">
     <h2>Notes</h2>
     <span class="badge" id="resultBadge">0</span>
@@ -309,7 +298,9 @@
 <div id="toast"></div>
 
 <script>
-  const API = 'http://localhost:3001';
+  // ✅ ONLY CHANGE HERE
+  const API = 'https://rnotes-backend-c86c.onrender.com';
+
   let allNotes = [];
 
   async function fetchNotes() {
@@ -322,7 +313,6 @@
     }
   }
 
-  // Fallback: run fully in-browser if backend not running
   function renderFallback() {
     allNotes = [
       { id: '1', title: 'Meeting notes', content: 'Discussed Q2 roadmap and upcoming product milestones.', created_at: new Date().toISOString() },
@@ -337,8 +327,6 @@
     const content = document.getElementById('noteContent').value.trim();
     if (!title || !content) { showToast('Please fill in both fields.'); return; }
 
-    const note = { id: Date.now().toString(), title, content, created_at: new Date().toISOString() };
-
     try {
       const res = await fetch(`${API}/notes`, {
         method: 'POST',
@@ -348,6 +336,7 @@
       const saved = await res.json();
       allNotes.unshift(saved);
     } catch {
+      const note = { id: Date.now().toString(), title, content, created_at: new Date().toISOString() };
       allNotes.unshift(note);
     }
 
@@ -385,9 +374,6 @@
     if (!notes.length) {
       list.innerHTML = `
         <div class="empty" style="grid-column:1/-1">
-          <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z"/>
-          </svg>
           <p>${q ? 'No notes match your search.' : 'No notes yet. Add one above!'}</p>
         </div>`;
       return;
@@ -397,7 +383,7 @@
       <div class="note-card">
         <div class="note-title">${highlight(n.title, q)}</div>
         <div class="note-content">${highlight(n.content, q)}</div>
-        <div class="note-date">${new Date(n.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
+        <div class="note-date">${new Date(n.created_at).toLocaleDateString()}</div>
       </div>
     `).join('');
   }
